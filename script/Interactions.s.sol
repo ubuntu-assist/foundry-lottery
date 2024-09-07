@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {Script, console} from "forge-std/Script.sol";
 import {HelperConfig, CodeConstants} from "script/HelperConfig.s.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {LinkToken} from "test/mocks/LinkToken.sol";
+import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
+import {Raffle} from "src/Raffle.sol";
 
 contract CreateSubscription is Script {
     function run() public {
@@ -77,5 +79,39 @@ contract FundSubscription is Script, CodeConstants {
             );
             vm.stopBroadcast();
         }
+    }
+}
+
+contract AddConsumer is Script {
+    function run() external {
+        address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
+            "Raffle",
+            block.chainid
+        );
+        addConsumerUsingConfig(mostRecentlyDeployed);
+    }
+
+    function addConsumerUsingConfig(address mostRecentlyDeployed) public {
+        HelperConfig config = new HelperConfig();
+        address vrfCoordinator = config.getConfig().vrfCoordinator;
+        uint256 subscriptionId = config.getConfig().subscriptionId;
+        addConsumer(mostRecentlyDeployed, vrfCoordinator, subscriptionId);
+    }
+
+    function addConsumer(
+        address contractToAddToVrf,
+        address vrfCoordinator,
+        uint256 subscriptionId
+    ) public {
+        console.log("Adding consumer contract: ", contractToAddToVrf);
+        console.log("To vrfCoordinator: ", vrfCoordinator);
+        console.log("On chainid: ", block.chainid);
+
+        vm.startBroadcast();
+        VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(
+            subscriptionId,
+            contractToAddToVrf
+        );
+        vm.stopBroadcast();
     }
 }

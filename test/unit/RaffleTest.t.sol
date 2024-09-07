@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity ^0.8.19;
 
 import {Test, console} from "forge-std/Test.sol";
 import {Raffle} from "src/Raffle.sol";
@@ -73,17 +73,17 @@ contract RaffleTest is Test {
         raffle.enterRaffle{value: entranceFee}();
     }
 
-    // function testDontAllowPlayersToEnterWhenRaffleIsCalculating() public {
-    //     // Arrange
-    //     vm.prank(PLAYER);
-    //     raffle.enterRaffle{value: entranceFee}();
-    //     vm.warp(block.timestamp + interval + 1); // ensures enough time has passed
-    //     vm.roll(block.number + 1);
-    //     raffle.performUpkeep(hex"");
+    function testDontAllowPlayersToEnterWhenRaffleIsCalculating() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // ensures enough time has passed
+        vm.roll(block.number + 1);
+        raffle.performUpkeep(hex"");
 
-    //     // Act & Assert
-    //     vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
-    //     vm.prank(PLAYER);
-    //     raffle.enterRaffle{value: entranceFee}();
-    // }
+        // Act & Assert
+        vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+    }
 }
