@@ -20,7 +20,7 @@
 // view & pure functions
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
@@ -36,7 +36,6 @@ contract Raffle is VRFConsumerBaseV2Plus {
     error Raffle__NotEnoughEntranceFee();
     error Raffle__RaffleNotOpen();
     error Raffle__TransferFailed();
-    error Raffle__RaffleNotOpened();
     error Raffle__UpkeepNotNeeded(
         uint256 balance,
         uint256 totalPlayers,
@@ -89,7 +88,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         if (msg.value < i_entranceFee) revert Raffle__NotEnoughEntranceFee();
 
         if (s_raffleState != RaffleState.OPEN) {
-            revert Raffle__RaffleNotOpened();
+            revert Raffle__RaffleNotOpen();
         }
 
         s_players.push(payable(msg.sender));
@@ -181,5 +180,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     function getPlayer(uint256 index) external view returns (address) {
         return s_players[index];
+    }
+
+    function getRaffleState() external view returns (RaffleState) {
+        return s_raffleState;
     }
 }
